@@ -251,17 +251,24 @@
             <h3>🔧 CORS Solutions</h3>
             <div class="proxy-option">
                 <label>
-                    <input type="radio" name="corsMethod" value="corsproxy" checked> 
-                    <strong>CORS Proxy (Recommended)</strong>
+                    <input type="radio" name="corsMethod" value="cors-sh" checked> 
+                    <strong>CORS.SH (Recommended)</strong>
                 </label>
-                <small>Uses corsproxy.io - most reliable option</small>
+                <small>Reliable proxy service with good uptime</small>
+            </div>
+            <div class="proxy-option">
+                <label>
+                    <input type="radio" name="corsMethod" value="codetabs"> 
+                    <strong>CodeTabs Proxy</strong>
+                </label>
+                <small>Alternative free proxy service</small>
             </div>
             <div class="proxy-option">
                 <label>
                     <input type="radio" name="corsMethod" value="allorigins"> 
                     <strong>AllOrigins Proxy</strong>
                 </label>
-                <small>Alternative proxy service</small>
+                <small>Backup proxy option</small>
             </div>
             <div class="proxy-option">
                 <label>
@@ -367,7 +374,7 @@
         let recognition = null;
         let isRecording = false;
         let selectedVoiceId = 'pNInz6obpgDQGcFmaJgB';
-        let corsMethod = 'corsproxy';
+        let corsMethod = 'cors-sh';
 
         function showStatus(message, type = 'info') {
             const status = document.getElementById('status');
@@ -565,8 +572,10 @@
 
         function getCorsProxyUrl(targetUrl) {
             switch(corsMethod) {
-                case 'corsproxy':
-                    return `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+                case 'cors-sh':
+                    return `https://proxy.cors.sh/${targetUrl}`;
+                case 'codetabs':
+                    return `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;
                 case 'allorigins':
                     return `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
                 default:
@@ -635,14 +644,29 @@
                 messages: [...conversationHistory, { role: "user", content: userMessage }]
             };
 
-            const apiUrl = getCorsProxyUrl('https://api.anthropic.com/v1/messages');
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
+            let apiUrl, headers;
+            
+            if (corsMethod === 'cors-sh') {
+                // CORS.SH format
+                apiUrl = 'https://proxy.cors.sh/https://api.anthropic.com/v1/messages';
+                headers = {
                     'Content-Type': 'application/json',
                     'x-api-key': claudeKey,
                     'anthropic-version': '2023-06-01'
-                },
+                };
+            } else {
+                // Other proxies
+                apiUrl = getCorsProxyUrl('https://api.anthropic.com/v1/messages');
+                headers = {
+                    'Content-Type': 'application/json',
+                    'x-api-key': claudeKey,
+                    'anthropic-version': '2023-06-01'
+                };
+            }
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: headers,
                 body: JSON.stringify(requestData)
             });
 
@@ -680,14 +704,29 @@
             const customVoiceId = document.getElementById('customVoiceId').value;
             const voiceId = customVoiceId || selectedVoiceId;
             
-            const apiUrl = getCorsProxyUrl(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`);
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
+            let apiUrl, headers;
+            
+            if (corsMethod === 'cors-sh') {
+                // CORS.SH format
+                apiUrl = `https://proxy.cors.sh/https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
+                headers = {
                     'Accept': 'audio/mpeg',
                     'Content-Type': 'application/json',
                     'xi-api-key': elevenKey
-                },
+                };
+            } else {
+                // Other proxies
+                apiUrl = getCorsProxyUrl(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`);
+                headers = {
+                    'Accept': 'audio/mpeg',
+                    'Content-Type': 'application/json',
+                    'xi-api-key': elevenKey
+                };
+            }
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: headers,
                 body: JSON.stringify({
                     text: text,
                     model_id: "eleven_monolingual_v1",
