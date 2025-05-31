@@ -258,10 +258,17 @@
             </div>
             <div class="proxy-option">
                 <label>
+                    <input type="radio" name="corsMethod" value="proxy-cors"> 
+                    <strong>Proxy-CORS.org</strong>
+                </label>
+                <small>Alternative reliable proxy</small>
+            </div>
+            <div class="proxy-option">
+                <label>
                     <input type="radio" name="corsMethod" value="codetabs"> 
                     <strong>CodeTabs Proxy</strong>
                 </label>
-                <small>Alternative free proxy service</small>
+                <small>Free proxy service</small>
             </div>
             <div class="proxy-option">
                 <label>
@@ -275,7 +282,7 @@
                     <input type="radio" name="corsMethod" value="demo"> 
                     <strong>Demo Mode</strong> (No API needed)
                 </label>
-                <small>Test interface with mock responses</small>
+                <small>Test interface with mock responses - always works!</small>
             </div>
         </div>
         
@@ -594,6 +601,8 @@
             switch(corsMethod) {
                 case 'cors-sh':
                     return `https://proxy.cors.sh/${targetUrl}`;
+                case 'proxy-cors':
+                    return `https://api.proxy-cors.org/${targetUrl}`;
                 case 'codetabs':
                     return `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;
                 case 'allorigins':
@@ -677,6 +686,15 @@
                     'anthropic-version': '2023-06-01',
                     'anthropic-dangerous-direct-browser-access': 'true'
                 };
+            } else if (corsMethod === 'proxy-cors') {
+                // Proxy-CORS.org format
+                apiUrl = 'https://api.proxy-cors.org/https://api.anthropic.com/v1/messages';
+                headers = {
+                    'Content-Type': 'application/json',
+                    'x-api-key': claudeKey,
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-dangerous-direct-browser-access': 'true'
+                };
             } else {
                 // Other proxies
                 apiUrl = getCorsProxyUrl('https://api.anthropic.com/v1/messages');
@@ -741,6 +759,13 @@
             
             if (corsMethod === 'cors-sh') {
                 apiUrl = `https://proxy.cors.sh/https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
+                headers = {
+                    'Accept': 'audio/mpeg',
+                    'Content-Type': 'application/json',
+                    'xi-api-key': elevenKey
+                };
+            } else if (corsMethod === 'proxy-cors') {
+                apiUrl = `https://api.proxy-cors.org/https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
                 headers = {
                     'Accept': 'audio/mpeg',
                     'Content-Type': 'application/json',
