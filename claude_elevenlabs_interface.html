@@ -258,17 +258,10 @@
             </div>
             <div class="proxy-option">
                 <label>
-                    <input type="radio" name="corsMethod" value="proxy-cors"> 
-                    <strong>Proxy-CORS.org</strong>
-                </label>
-                <small>Alternative reliable proxy</small>
-            </div>
-            <div class="proxy-option">
-                <label>
                     <input type="radio" name="corsMethod" value="codetabs"> 
                     <strong>CodeTabs Proxy</strong>
                 </label>
-                <small>Free proxy service</small>
+                <small>Alternative free proxy service</small>
             </div>
             <div class="proxy-option">
                 <label>
@@ -282,7 +275,7 @@
                     <input type="radio" name="corsMethod" value="demo"> 
                     <strong>Demo Mode</strong> (No API needed)
                 </label>
-                <small>Test interface with mock responses - always works!</small>
+                <small>Test interface with mock responses</small>
             </div>
         </div>
         
@@ -330,40 +323,21 @@
             </div>
             <div class="input-group">
                 <label>Voice Selection:</label>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div>
-                        <label style="font-size: 14px; color: #666; margin-bottom: 8px;">Character 1 Voice:</label>
-                        <div class="voice-selector">
-                            <div class="voice-option selected" data-voice="pNInz6obpgDQGcFmaJgB" data-character="1">Adam</div>
-                            <div class="voice-option" data-voice="21m00Tcm4TlvDq8ikWAM" data-character="1">Rachel</div>
-                            <div class="voice-option" data-voice="AZnzlk1XvdvUeBnXmlld" data-character="1">Domi</div>
-                            <div class="voice-option" data-voice="EXAVITQu4vr4xnSDxMaL" data-character="1">Bella</div>
-                            <div class="voice-option" data-voice="ErXwobaYiN019PkySvjV" data-character="1">Antoni</div>
-                            <div class="voice-option" data-voice="MF3mGyEYCl7XYWbV9V6O" data-character="1">Elli</div>
-                        </div>
-                        <input type="text" id="customVoiceId1" placeholder="Or custom Voice ID" style="margin-top: 8px; font-size: 12px;">
-                    </div>
-                    <div>
-                        <label style="font-size: 14px; color: #666; margin-bottom: 8px;">Character 2 Voice:</label>
-                        <div class="voice-selector">
-                            <div class="voice-option" data-voice="pNInz6obpgDQGcFmaJgB" data-character="2">Adam</div>
-                            <div class="voice-option selected" data-voice="21m00Tcm4TlvDq8ikWAM" data-character="2">Rachel</div>
-                            <div class="voice-option" data-voice="AZnzlk1XvdvUeBnXmlld" data-character="2">Domi</div>
-                            <div class="voice-option" data-voice="EXAVITQu4vr4xnSDxMaL" data-character="2">Bella</div>
-                            <div class="voice-option" data-voice="ErXwobaYiN019PkySvjV" data-character="2">Antoni</div>
-                            <div class="voice-option" data-voice="MF3mGyEYCl7XYWbV9V6O" data-character="2">Elli</div>
-                        </div>
-                        <input type="text" id="customVoiceId2" placeholder="Or custom Voice ID" style="margin-top: 8px; font-size: 12px;">
-                    </div>
+                <div class="voice-selector">
+                    <div class="voice-option selected" data-voice="pNInz6obpgDQGcFmaJgB">Adam</div>
+                    <div class="voice-option" data-voice="21m00Tcm4TlvDq8ikWAM">Rachel</div>
+                    <div class="voice-option" data-voice="AZnzlk1XvdvUeBnXmlld">Domi</div>
+                    <div class="voice-option" data-voice="EXAVITQu4vr4xnSDxMaL">Bella</div>
+                    <div class="voice-option" data-voice="ErXwobaYiN019PkySvjV">Antoni</div>
+                    <div class="voice-option" data-voice="MF3mGyEYCl7XYWbV9V6O">Elli</div>
                 </div>
-                <input type="text" id="customVoiceId" placeholder="Or enter custom Voice ID" style="margin-top: 10px; display: none;">
+                <input type="text" id="customVoiceId" placeholder="Or enter custom Voice ID" style="margin-top: 10px;">
             </div>
         </div>
         
         <div class="input-group">
             <label for="scenario">Roleplay Scenario:</label>
-            <textarea id="scenario" rows="4" placeholder="e.g., 'You are playing two characters: Character 1 is a wise wizard named Gandalf, and Character 2 is a mischievous fairy named Pix. Start each response with [Character 1: ] or [Character 2: ] to indicate who is speaking.'"></textarea>
-            <small style="color: #666; font-style: italic;">💡 Tip: Ask Claude to use [Character 1: ] and [Character 2: ] tags so the interface can assign different voices automatically!</small>
+            <textarea id="scenario" rows="3" placeholder="e.g., 'You are a friendly wizard helping me on a quest' or 'You are a detective investigating a mystery'"></textarea>
         </div>
         
         <div class="input-group">
@@ -399,8 +373,7 @@
         let conversationHistory = [];
         let recognition = null;
         let isRecording = false;
-        let selectedVoiceId1 = 'pNInz6obpgDQGcFmaJgB'; // Character 1 voice
-        let selectedVoiceId2 = '21m00Tcm4TlvDq8ikWAM'; // Character 2 voice
+        let selectedVoiceId = 'pNInz6obpgDQGcFmaJgB';
         let corsMethod = 'cors-sh';
 
         function showStatus(message, type = 'info') {
@@ -601,8 +574,6 @@
             switch(corsMethod) {
                 case 'cors-sh':
                     return `https://proxy.cors.sh/${targetUrl}`;
-                case 'proxy-cors':
-                    return `https://api.proxy-cors.org/${targetUrl}`;
                 case 'codetabs':
                     return `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;
                 case 'allorigins':
@@ -637,11 +608,9 @@
                 const elevenKey = document.getElementById('elevenKey').value;
                 if (elevenKey) {
                     try {
-                        // Test both voices
-                        const audioBlob1 = await makeElevenLabsRequest('Character 1 test', 1);
-                        const audioBlob2 = await makeElevenLabsRequest('Character 2 test', 2);
-                        if (audioBlob1 && audioBlob2) {
-                            showStatus('✅ Both APIs working perfectly! Both character voices ready.', 'success');
+                        const audioBlob = await makeElevenLabsRequest('API test successful');
+                        if (audioBlob) {
+                            showStatus('✅ Both APIs working perfectly!', 'success');
                         }
                     } catch (voiceError) {
                         showStatus(`Claude works, but ElevenLabs failed: ${voiceError.message}`, 'error');
@@ -686,15 +655,6 @@
                     'anthropic-version': '2023-06-01',
                     'anthropic-dangerous-direct-browser-access': 'true'
                 };
-            } else if (corsMethod === 'proxy-cors') {
-                // Proxy-CORS.org format
-                apiUrl = 'https://api.proxy-cors.org/https://api.anthropic.com/v1/messages';
-                headers = {
-                    'Content-Type': 'application/json',
-                    'x-api-key': claudeKey,
-                    'anthropic-version': '2023-06-01',
-                    'anthropic-dangerous-direct-browser-access': 'true'
-                };
             } else {
                 // Other proxies
                 apiUrl = getCorsProxyUrl('https://api.anthropic.com/v1/messages');
@@ -721,9 +681,9 @@
             return data.content[0].text;
         }
 
-        async function makeElevenLabsRequest(text, characterNumber = 1) {
+        async function makeElevenLabsRequest(text) {
             if (corsMethod === 'demo') {
-                // Create different pitch beeps for different characters
+                // Create a short beep sound as demo audio
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
@@ -731,47 +691,33 @@
                 oscillator.connect(gainNode);
                 gainNode.connect(audioContext.destination);
                 
-                // Different frequencies for different characters
-                const frequency = characterNumber === 1 ? 440 : 660;
-                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
                 gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
                 
                 oscillator.start(audioContext.currentTime);
                 oscillator.stop(audioContext.currentTime + 0.5);
                 
+                // Return a mock blob for demo
                 return new Blob([new ArrayBuffer(1024)], { type: 'audio/mpeg' });
             }
 
             const elevenKey = document.getElementById('elevenKey').value;
-            
-            // Choose voice based on character
-            let voiceId;
-            if (characterNumber === 1) {
-                const customVoiceId1 = document.getElementById('customVoiceId1').value;
-                voiceId = customVoiceId1 || selectedVoiceId1;
-            } else {
-                const customVoiceId2 = document.getElementById('customVoiceId2').value;
-                voiceId = customVoiceId2 || selectedVoiceId2;
-            }
+            const customVoiceId = document.getElementById('customVoiceId').value;
+            const voiceId = customVoiceId || selectedVoiceId;
             
             let apiUrl, headers;
             
             if (corsMethod === 'cors-sh') {
+                // CORS.SH format
                 apiUrl = `https://proxy.cors.sh/https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
                 headers = {
                     'Accept': 'audio/mpeg',
                     'Content-Type': 'application/json',
                     'xi-api-key': elevenKey
                 };
-            } else if (corsMethod === 'proxy-cors') {
-                apiUrl = `https://api.proxy-cors.org/https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
-                headers = {
-                    'Accept': 'audio/mpeg',
-                    'Content-Type': 'application/json',
-                    'xi-api-key': elevenKey
-                };
             } else {
+                // Other proxies
                 apiUrl = getCorsProxyUrl(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`);
                 headers = {
                     'Accept': 'audio/mpeg',
@@ -835,37 +781,12 @@
                     }
                 }
 
-                // Try to generate speech with character detection
+                // Try to generate speech
                 const elevenKey = document.getElementById('elevenKey').value;
                 if (elevenKey || corsMethod === 'demo') {
                     showStatus('Converting to speech...', 'info');
                     try {
-                        // Detect which character is speaking
-                        let characterNumber = 1;
-                        let textToSpeak = claudeText;
-                        
-                        // Look for character tags
-                        if (claudeText.includes('[Character 1:') || claudeText.includes('[Character1:')) {
-                            characterNumber = 1;
-                            textToSpeak = claudeText.replace(/\[Character\s*1:\s*\]/gi, '').trim();
-                        } else if (claudeText.includes('[Character 2:') || claudeText.includes('[Character2:')) {
-                            characterNumber = 2;
-                            textToSpeak = claudeText.replace(/\[Character\s*2:\s*\]/gi, '').trim();
-                        } else if (claudeText.includes('[') && claudeText.includes(':')) {
-                            // Try to detect other character indicators
-                            const match = claudeText.match(/\[(.*?):/);
-                            if (match) {
-                                const characterName = match[1].toLowerCase();
-                                // Simple heuristic: if it contains "2" or common second character words
-                                if (characterName.includes('2') || characterName.includes('fairy') || 
-                                    characterName.includes('assistant') || characterName.includes('sidekick')) {
-                                    characterNumber = 2;
-                                }
-                                textToSpeak = claudeText.replace(/\[.*?:\s*\]/gi, '').trim();
-                            }
-                        }
-                        
-                        const audioBlob = await makeElevenLabsRequest(textToSpeak, characterNumber);
+                        const audioBlob = await makeElevenLabsRequest(claudeText);
                         const audioUrl = URL.createObjectURL(audioBlob);
                         const audioPlayer = document.getElementById('audioPlayer');
                         const audioControls = document.getElementById('audioControls');
@@ -873,9 +794,7 @@
                         audioControls.style.display = 'flex';
                         audioPlayer.play();
                         currentAudio = audioPlayer;
-                        
-                        const voiceName = characterNumber === 1 ? 'Character 1 voice' : 'Character 2 voice';
-                        showStatus(`✅ Playing response with ${voiceName}!`, 'success');
+                        showStatus('✅ Playing response!', 'success');
                     } catch (voiceError) {
                         showStatus(`Text received! Voice synthesis failed: ${voiceError.message}`, 'error');
                     }
@@ -928,27 +847,13 @@
                 });
             });
 
-            // Voice selection for both characters
+            // Voice selection
             document.querySelectorAll('.voice-option').forEach(option => {
                 option.addEventListener('click', function() {
-                    const character = this.dataset.character;
-                    
-                    // Remove selection from this character's voice options
-                    document.querySelectorAll(`.voice-option[data-character="${character}"]`).forEach(o => 
-                        o.classList.remove('selected')
-                    );
-                    
-                    // Select this option
+                    document.querySelectorAll('.voice-option').forEach(o => o.classList.remove('selected'));
                     this.classList.add('selected');
-                    
-                    // Update the appropriate voice variable
-                    if (character === '1') {
-                        selectedVoiceId1 = this.dataset.voice;
-                        showStatus(`Selected Character 1 voice: ${this.textContent}`, 'info');
-                    } else {
-                        selectedVoiceId2 = this.dataset.voice;
-                        showStatus(`Selected Character 2 voice: ${this.textContent}`, 'info');
-                    }
+                    selectedVoiceId = this.dataset.voice;
+                    showStatus(`Selected voice: ${this.textContent}`, 'info');
                 });
             });
 
