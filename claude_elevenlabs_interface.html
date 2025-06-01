@@ -332,7 +332,7 @@
             </div>
         </div>
         
-        <div class="demo-mode" id="demoInfo" style="display: block;">
+        <div class="demo-mode" id="demoInfo" style="display: none;">
             <h3>🎯 Demo Mode Active</h3>
             <p>This mode simulates API responses including coach interruptions. Switch to auto-failover above to use real APIs.</p>
         </div>
@@ -364,7 +364,7 @@
             <p><em><strong>Note:</strong> You can still type messages and use all other features without microphone access!</em></p>
         </div>
         
-        <div class="api-setup" id="apiSetup" style="opacity: 0.5;">
+        <div class="api-setup" id="apiSetup">
             <h3>API Configuration</h3>
             <div class="input-group">
                 <label for="claudeKey">Claude API Key:</label>
@@ -417,7 +417,7 @@
         
         <div class="input-group">
             <label for="scenario">Roleplay Scenario & Coach Instructions:</label>
-            <textarea id="scenario" rows="8" placeholder="Paste your detailed scenario instructions here..."></textarea>
+            <textarea id="scenario" rows="4" placeholder="e.g., 'You are a friendly wizard helping me on a quest. You also act as a coach who steps in periodically to give me guidance on my roleplay choices and help me improve my storytelling skills. When coaching, clearly indicate you are stepping out of character.'"></textarea>
         </div>
         
         <div class="input-group">
@@ -433,14 +433,14 @@
             <button onclick="testConnection()">Test APIs</button>
         </div>
         
-        <div id="status" class="status info">Demo mode activated - coach voice switching included</div>
+        <div id="status"></div>
         
         <div id="speechIndicator" class="speech-indicator" style="display: none;">
             🎤 Listening... Speak now, then click "Stop Speaking" when done.
         </div>
         
         <div class="chat-container" id="chatContainer">
-            <p style="text-align: center; color: #666;">Paste your scenario instructions above, then start chatting!</p>
+            <p style="text-align: center; color: #666;">Set up your scenario with coach instructions, then start chatting!</p>
         </div>
         
         <div class="audio-controls" id="audioControls" style="display: none;">
@@ -826,25 +826,12 @@
             if (corsMethod === 'demo') {
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 
-                // Enhanced demo responses that follow the full conversation flow
+                // Simple demo responses - for real functionality, use API mode
                 const demoResponses = [
                     "Hi Kit, how's that roomie situation going? Probably different than mine.",
                     "What do you mean by that? Are you saying my situation is somehow worse? That's pretty judgmental of you, Kit.",
                     "You know what? I'm getting really tired of your attitude. You always act like you've got everything figured out.",
-                    "Fine, whatever Kit. You never listen anyway. I don't know why I even bother talking to you about anything serious.",
-                    "**Coach:** Kit, I'm stepping in here. This conversation has escalated quite a bit. This is exactly where we can practice better approaches. Let's work on Lesson 1 - stopping and monitoring yourself when emotions run high.",
-                    "**Coach:** I notice you're feeling defensive. That's completely normal! The first lesson is about pausing when emotions run high. Try saying something like 'I want to understand - can you give me a minute?' Are you ready to watch a brief video about this? Here's the link: Video-1",
-                    "**Coach:** Great! Now let's try a different scenario to practice Lesson 1. Let's say you're talking to your boss about a project deadline...",
-                    "Your boss here - I'm really disappointed in your progress on the quarterly report. This is the third time you've missed a deadline.",
-                    "**Coach:** Remember Lesson 1 - try to pause and ask for a minute to understand.",
-                    "**Coach:** Good attempt! I can see you're trying to use the technique. How did that feel? Was it helpful to pause before responding?",
-                    "**Coach:** Now let's work on Lesson 2 - being curious about your own behavior. Are you ready for the second video? Here's the link: Video-2",
-                    "**Coach:** In Lesson 2, we examine our own actions without judgment. Try asking yourself: 'Did my behavior play a role in this?' Then seek confirmation from the other person.",
-                    "**Coach:** Excellent progress! You're learning to be curious rather than defensive. How are you feeling about this approach?",
-                    "**Coach:** Now for Lesson 3 - acknowledging your reaction and focusing on joint repair. Ready for the final video? Here's the link: Video-3",
-                    "**Coach:** Perfect! You've completed all three lessons. In Part 3, you'll practice all these skills together in a new scenario without my interruption.",
-                    "You're at a family dinner and your sibling says: 'You never call Mom anymore. She's really hurt by your neglect.'",
-                    "**Coach:** Wonderful! You've demonstrated mastery of all three lessons - pausing when emotional, being curious about your role, and working toward joint solutions. You've successfully reduced the tension and moved toward repairing the relationship. Would you like to try another practice scenario?"
+                    "**Coach:** Kit, I'm stepping in here. This conversation has escalated quite a bit. This is exactly where we can practice better approaches. Let's work on Lesson 1 - stopping and monitoring yourself when emotions run high."
                 ];
                 
                 return demoResponses[Math.min(demoStep, demoResponses.length - 1)];
@@ -962,6 +949,8 @@
 
             return await response.blob();
         }
+
+
 
         async function sendMessage() {
             if (corsMethod !== 'demo') {
