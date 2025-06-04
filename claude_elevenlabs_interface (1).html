@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claude Roleplay with Integrated Coach</title>
+    <title>Claude + ElevenLabs Roleplay (Fixed)</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -219,11 +219,6 @@
             color: white;
         }
         
-        .voice-option.coach-selected {
-            background: #9f7aea;
-            color: white;
-        }
-        
         .microphone-help {
             background: #ffebee;
             border: 1px solid #f44336;
@@ -241,100 +236,52 @@
             margin: 10px 0;
             color: #856404;
         }
-        
-        .voice-section {
-            background: #f8f9ff;
-            border: 1px solid #d0d0ff;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
-        }
-        
-        .connection-status {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin: 10px 0;
-        }
-        
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #ccc;
-        }
-        
-        .status-indicator.connected {
-            background: #4caf50;
-            animation: pulse-green 2s infinite;
-        }
-        
-        .status-indicator.error {
-            background: #f44336;
-        }
-        
-        @keyframes pulse-green {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-        
-        .coach-instruction {
-            background: #fff9e6;
-            border: 1px solid #ffc107;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
-            color: #8b5000;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎭 Claude Roleplay with Integrated Coach</h1>
+        <h1>🎭 Claude + ElevenLabs Roleplay</h1>
         
         <div class="cors-info">
-            <h3>✅ Enhanced CORS Solution with Voice Detection</h3>
-            <p>Automatic proxy switching and intelligent voice selection based on Claude's response content.</p>
-        </div>
-        
-        <div class="connection-status">
-            <div class="status-indicator" id="corsStatus"></div>
-            <span>CORS Proxy Status</span>
-            <div class="status-indicator" id="claudeStatus"></div>
-            <span>Claude API</span>
-            <div class="status-indicator" id="elevenStatus"></div>
-            <span>ElevenLabs API</span>
+            <h3>✅ CORS Solution Implemented</h3>
+            <p>Multiple proxy options available to handle API calls and resolve "Failed to fetch" errors.</p>
         </div>
         
         <div class="proxy-selector">
             <h3>🔧 CORS Solutions</h3>
             <div class="proxy-option">
                 <label>
-                    <input type="radio" name="corsMethod" value="auto"> 
-                    <strong>Smart Auto-Failover</strong>
+                    <input type="radio" name="corsMethod" value="cors-sh" checked> 
+                    <strong>CORS.SH (Recommended)</strong>
                 </label>
-                <small>Automatically switches between proxies if one fails</small>
+                <small>Reliable proxy service with good uptime</small>
             </div>
             <div class="proxy-option">
                 <label>
-                    <input type="radio" name="corsMethod" value="cors-sh"> 
-                    <strong>CORS.SH Only</strong>
+                    <input type="radio" name="corsMethod" value="codetabs"> 
+                    <strong>CodeTabs Proxy</strong>
                 </label>
-                <small>Use only CORS.SH proxy</small>
+                <small>Alternative free proxy service</small>
             </div>
             <div class="proxy-option">
                 <label>
-                    <input type="radio" name="corsMethod" value="demo" checked> 
-                    <strong>Demo Mode (Recommended for Testing)</strong>
+                    <input type="radio" name="corsMethod" value="allorigins"> 
+                    <strong>AllOrigins Proxy</strong>
+                </label>
+                <small>Backup proxy option</small>
+            </div>
+            <div class="proxy-option">
+                <label>
+                    <input type="radio" name="corsMethod" value="demo"> 
+                    <strong>Demo Mode</strong> (No API needed)
                 </label>
                 <small>Test interface with mock responses</small>
             </div>
         </div>
         
-        <div class="demo-mode" id="demoInfo" style="display: block;">
+        <div class="demo-mode" id="demoInfo" style="display: none;">
             <h3>🎯 Demo Mode Active</h3>
-            <p>This mode simulates API responses including coach interruptions. Switch to auto-failover above to use real APIs.</p>
+            <p>This mode simulates API responses so you can test the interface without API keys. Switch to a proxy method above to use real APIs.</p>
         </div>
         
         <div class="api-help">
@@ -364,7 +311,7 @@
             <p><em><strong>Note:</strong> You can still type messages and use all other features without microphone access!</em></p>
         </div>
         
-        <div class="api-setup" id="apiSetup" style="opacity: 0.5;">
+        <div class="api-setup" id="apiSetup">
             <h3>API Configuration</h3>
             <div class="input-group">
                 <label for="claudeKey">Claude API Key:</label>
@@ -374,11 +321,9 @@
                 <label for="elevenKey">ElevenLabs API Key:</label>
                 <input type="password" id="elevenKey" placeholder="Get from elevenlabs.io/app/speech-synthesis">
             </div>
-            
-            <div class="voice-section">
-                <h4>🎯 Character Voice Selection:</h4>
-                <label>Character Voice (for roleplay scenarios):</label>
-                <div class="voice-selector" id="characterVoices">
+            <div class="input-group">
+                <label>Voice Selection:</label>
+                <div class="voice-selector">
                     <div class="voice-option selected" data-voice="pNInz6obpgDQGcFmaJgB">Adam</div>
                     <div class="voice-option" data-voice="21m00Tcm4TlvDq8ikWAM">Rachel</div>
                     <div class="voice-option" data-voice="AZnzlk1XvdvUeBnXmlld">Domi</div>
@@ -386,38 +331,13 @@
                     <div class="voice-option" data-voice="ErXwobaYiN019PkySvjV">Antoni</div>
                     <div class="voice-option" data-voice="MF3mGyEYCl7XYWbV9V6O">Elli</div>
                 </div>
-                <input type="text" id="customCharacterVoice" placeholder="Or enter custom Character Voice ID" style="margin-top: 10px;">
+                <input type="text" id="customVoiceId" placeholder="Or enter custom Voice ID" style="margin-top: 10px;">
             </div>
-            
-            <div class="voice-section">
-                <h4>🎓 Coach Voice Selection:</h4>
-                <label>Coach Voice (detected automatically in responses):</label>
-                <div class="voice-selector" id="coachVoices">
-                    <div class="voice-option coach-selected" data-voice="21m00Tcm4TlvDq8ikWAM">Rachel</div>
-                    <div class="voice-option" data-voice="pNInz6obpgDQGcFmaJgB">Adam</div>
-                    <div class="voice-option" data-voice="AZnzlk1XvdvUeBnXmlld">Domi</div>
-                    <div class="voice-option" data-voice="EXAVITQu4vr4xnSDxMaL">Bella</div>
-                    <div class="voice-option" data-voice="ErXwobaYiN019PkySvjV">Antoni</div>
-                    <div class="voice-option" data-voice="MF3mGyEYCl7XYWbV9V6O">Elli</div>
-                </div>
-                <input type="text" id="customCoachVoice" placeholder="Or enter custom Coach Voice ID" style="margin-top: 10px;">
-            </div>
-        </div>
-        
-        <div class="coach-instruction">
-            <h4>🎓 How the Integrated Coach Works:</h4>
-            <p>Claude will naturally step in as a coach during the roleplay when appropriate. The system automatically detects when Claude is speaking as the coach vs. the character and switches voices accordingly. Coach moments are triggered by:</p>
-            <ul>
-                <li>Natural conversation flow needing guidance</li>
-                <li>Opportunities for learning or improvement</li>
-                <li>Transitions between scenarios</li>
-                <li>When you seem stuck or need direction</li>
-            </ul>
         </div>
         
         <div class="input-group">
-            <label for="scenario">Roleplay Scenario & Coach Instructions:</label>
-            <textarea id="scenario" rows="8" placeholder="Paste your detailed scenario instructions here..."></textarea>
+            <label for="scenario">Roleplay Scenario:</label>
+            <textarea id="scenario" rows="3" placeholder="e.g., 'You are a friendly wizard helping me on a quest' or 'You are a detective investigating a mystery'"></textarea>
         </div>
         
         <div class="input-group">
@@ -433,14 +353,14 @@
             <button onclick="testConnection()">Test APIs</button>
         </div>
         
-        <div id="status" class="status info">Demo mode activated - coach voice switching included</div>
+        <div id="status"></div>
         
         <div id="speechIndicator" class="speech-indicator" style="display: none;">
             🎤 Listening... Speak now, then click "Stop Speaking" when done.
         </div>
         
         <div class="chat-container" id="chatContainer">
-            <p style="text-align: center; color: #666;">Paste your scenario instructions above, then start chatting!</p>
+            <p style="text-align: center; color: #666;">Choose your CORS method above, then start chatting!</p>
         </div>
         
         <div class="audio-controls" id="audioControls" style="display: none;">
@@ -453,24 +373,8 @@
         let conversationHistory = [];
         let recognition = null;
         let isRecording = false;
-        let selectedCharacterVoice = 'pNInz6obpgDQGcFmaJgB';
-        let selectedCoachVoice = '21m00Tcm4TlvDq8ikWAM';
-        let corsMethod = 'demo';
-        let currentProxyIndex = 0;
-        let demoStep = 0; // Track demo conversation steps
-        
-        // Enhanced proxy list with failover
-        const corsProxies = [
-            { name: 'cors-sh', url: 'https://proxy.cors.sh/', format: 'direct' },
-            { name: 'allorigins', url: 'https://api.allorigins.win/raw?url=', format: 'param' },
-            { name: 'codetabs', url: 'https://api.codetabs.com/v1/proxy?quest=', format: 'param' },
-            { name: 'cors-anywhere', url: 'https://thingproxy.freeboard.io/fetch/', format: 'direct' },
-            { name: 'proxy-cors', url: 'https://api.allorigins.win/get?url=', format: 'json' }
-        ];
-
-        function updateStatusIndicator(element, status) {
-            element.className = `status-indicator ${status}`;
-        }
+        let selectedVoiceId = 'pNInz6obpgDQGcFmaJgB';
+        let corsMethod = 'cors-sh';
 
         function showStatus(message, type = 'info') {
             const status = document.getElementById('status');
@@ -482,72 +386,10 @@
         function addMessage(content, isUser = false) {
             const chatContainer = document.getElementById('chatContainer');
             const messageDiv = document.createElement('div');
-            const messageClass = isUser ? 'user-message' : 'claude-message';
-            const speaker = isUser ? 'You' : 'Claude';
-            
-            messageDiv.className = `message ${messageClass}`;
-            messageDiv.innerHTML = `<strong>${speaker}:</strong> ${content}`;
+            messageDiv.className = `message ${isUser ? 'user-message' : 'claude-message'}`;
+            messageDiv.innerHTML = `<strong>${isUser ? 'You' : 'Claude'}:</strong> ${content}`;
             chatContainer.appendChild(messageDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-
-        function detectCoachSpeaking(text) {
-            // Detect when Claude is speaking as Coach vs Taylor
-            const coachIndicators = [
-                '**coach**',
-                '*coach*',
-                'coach:',
-                '*as coach*',
-                '*as your coach*',
-                '*stepping out of character*',
-                '*coaching moment*',
-                '[coach]',
-                '(coach)',
-                'coach here',
-                'coach mode',
-                'let me step in',
-                'i\'m going to step in',
-                'i need to step in',
-                'coach perspective',
-                'from a coaching standpoint',
-                'as a coach'
-            ];
-            
-            const lowerText = text.toLowerCase();
-            return coachIndicators.some(indicator => lowerText.includes(indicator.toLowerCase()));
-        }
-
-        async function playResponseWithCorrectVoice(text) {
-            const elevenKey = document.getElementById('elevenKey').value;
-            if (!elevenKey && corsMethod !== 'demo') {
-                showStatus('✅ Response received! Add ElevenLabs key for speech.', 'success');
-                return;
-            }
-
-            // Determine if this is Coach or Taylor speaking
-            const isCoachSpeaking = detectCoachSpeaking(text);
-            const speaker = isCoachSpeaking ? 'Coach' : 'Taylor';
-            
-            showStatus(`🎵 Converting to speech (${speaker} voice)...`, 'info');
-            
-            try {
-                const audioBlob = await makeRequestWithFailover(() => 
-                    makeElevenLabsRequest(text, isCoachSpeaking));
-                
-                const audioUrl = URL.createObjectURL(audioBlob);
-                const audioPlayer = document.getElementById('audioPlayer');
-                const audioControls = document.getElementById('audioControls');
-                
-                audioPlayer.src = audioUrl;
-                audioControls.style.display = 'flex';
-                audioPlayer.play();
-                currentAudio = audioPlayer;
-                
-                showStatus(`✅ Playing ${speaker} voice!`, 'success');
-            } catch (voiceError) {
-                showStatus(`Text received! Voice synthesis failed: ${voiceError.message}`, 'error');
-                updateStatusIndicator(document.getElementById('elevenStatus'), 'error');
-            }
         }
 
         function initializeSpeechRecognition() {
@@ -559,6 +401,7 @@
                 recognition.lang = 'en-US';
                 
                 recognition.onstart = function() {
+                    console.log('Speech recognition started');
                     const speechIndicator = document.getElementById('speechIndicator');
                     speechIndicator.textContent = '🎤 Listening... Speak now!';
                     speechIndicator.style.display = 'block';
@@ -566,6 +409,7 @@
                 };
                 
                 recognition.onresult = function(event) {
+                    console.log('Speech recognition result:', event);
                     let interimTranscript = '';
                     let finalTranscript = '';
                     
@@ -578,12 +422,14 @@
                         }
                     }
                     
+                    // Show interim results in real-time
                     if (interimTranscript) {
                         const speechIndicator = document.getElementById('speechIndicator');
                         speechIndicator.textContent = `🎤 Hearing: "${interimTranscript}"`;
                         showStatus(`Hearing: "${interimTranscript}"`, 'info');
                     }
                     
+                    // Add final results to text box
                     if (finalTranscript) {
                         const currentText = document.getElementById('userInput').value;
                         document.getElementById('userInput').value = currentText + finalTranscript + ' ';
@@ -592,25 +438,36 @@
                 };
                 
                 recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event);
                     let errorMessage = 'Speech recognition error: ';
                     switch(event.error) {
                         case 'not-allowed':
-                            errorMessage += 'Microphone permission denied.';
+                            errorMessage += 'Microphone permission denied. Click the microphone icon in your browser bar to allow access.';
                             document.getElementById('microphoneHelp').style.display = 'block';
                             break;
                         case 'no-speech':
-                            errorMessage += 'No speech detected.';
+                            errorMessage += 'No speech detected. Make sure your microphone is working and try speaking louder.';
+                            break;
+                        case 'audio-capture':
+                            errorMessage += 'No microphone found. Check that your microphone is connected.';
+                            break;
+                        case 'network':
+                            errorMessage += 'Network error. Check your internet connection.';
+                            break;
+                        case 'aborted':
+                            errorMessage += 'Speech recognition was aborted.';
                             break;
                         default:
-                            errorMessage += event.error;
+                            errorMessage += `${event.error}. Try refreshing the page.`;
                     }
                     showStatus(errorMessage, 'error');
                     stopSpeechRecognition();
                 };
                 
                 recognition.onend = function() {
+                    console.log('Speech recognition ended');
                     if (isRecording) {
-                        showStatus('Speech recognition stopped. Click "Start Speaking" to continue.', 'error');
+                        showStatus('Speech recognition stopped unexpectedly. Click "Start Speaking" to try again.', 'error');
                         stopSpeechRecognition();
                     }
                 };
@@ -621,6 +478,8 @@
         }
 
         async function toggleSpeechRecognition() {
+            console.log('Toggle speech recognition called, isRecording:', isRecording);
+            
             if (!recognition) {
                 showStatus('Speech recognition not supported. Try Chrome, Edge, or Safari.', 'error');
                 return;
@@ -629,22 +488,31 @@
             if (isRecording) {
                 stopSpeechRecognition();
             } else {
+                // First check microphone permission
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     stream.getTracks().forEach(track => track.stop());
+                    console.log('Microphone permission granted');
                     startSpeechRecognition();
                 } catch (error) {
+                    console.error('Microphone permission error:', error);
                     if (error.name === 'NotAllowedError') {
-                        showStatus('❌ Microphone access denied. Please allow microphone access.', 'error');
+                        showStatus('❌ Microphone access denied. Please allow microphone access and try again.', 'error');
+                        document.getElementById('microphoneHelp').style.display = 'block';
+                    } else if (error.name === 'SecurityError' || error.message.includes('security origin')) {
+                        showStatus('❌ HTTPS required for microphone. Upload to GitHub Pages, Netlify, or Vercel.', 'error');
                         document.getElementById('microphoneHelp').style.display = 'block';
                     } else {
                         showStatus(`❌ Microphone error: ${error.message}`, 'error');
+                        document.getElementById('microphoneHelp').style.display = 'block';
                     }
+                    return;
                 }
             }
         }
         
         function startSpeechRecognition() {
+            console.log('Starting speech recognition...');
             isRecording = true;
             const speechBtn = document.getElementById('speechBtn');
             const speechIndicator = document.getElementById('speechIndicator');
@@ -656,14 +524,17 @@
             
             try {
                 recognition.start();
+                console.log('Speech recognition start() called');
                 showStatus('🎤 Starting speech recognition...', 'info');
             } catch (error) {
+                console.error('Failed to start recognition:', error);
                 showStatus(`Failed to start speech recognition: ${error.message}`, 'error');
                 stopSpeechRecognition();
             }
         }
         
         function stopSpeechRecognition() {
+            console.log('Stopping speech recognition...');
             isRecording = false;
             const speechBtn = document.getElementById('speechBtn');
             const speechIndicator = document.getElementById('speechIndicator');
@@ -675,6 +546,7 @@
             if (recognition) {
                 try {
                     recognition.stop();
+                    console.log('Speech recognition stop() called');
                 } catch (error) {
                     console.error('Error stopping recognition:', error);
                 }
@@ -686,99 +558,35 @@
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 stream.getTracks().forEach(track => track.stop());
-                showStatus('✅ Microphone access granted!', 'success');
+                showStatus('✅ Microphone access granted! Speech recognition should work now.', 'success');
                 document.getElementById('microphoneHelp').style.display = 'none';
                 document.getElementById('speechBtn').disabled = false;
             } catch (error) {
-                showStatus(`❌ Microphone error: ${error.message}`, 'error');
+                if (error.name === 'NotAllowedError') {
+                    showStatus('❌ Microphone access denied. Please check your browser settings.', 'error');
+                } else {
+                    showStatus(`❌ Microphone error: ${error.message}`, 'error');
+                }
             }
         }
 
-        function getCorsProxyUrl(targetUrl, proxyIndex = currentProxyIndex) {
-            if (corsMethod === 'demo') return targetUrl;
-            if (corsMethod === 'cors-sh') proxyIndex = 0;
-            
-            const proxy = corsProxies[proxyIndex % corsProxies.length];
-            updateStatusIndicator(document.getElementById('corsStatus'), 'connected');
-            
-            switch(proxy.format) {
-                case 'direct':
-                    return `${proxy.url}${targetUrl}`;
-                case 'param':
-                    return `${proxy.url}${encodeURIComponent(targetUrl)}`;
-                case 'json':
-                    return `${proxy.url}${encodeURIComponent(targetUrl)}`;
+        function getCorsProxyUrl(targetUrl) {
+            switch(corsMethod) {
+                case 'cors-sh':
+                    return `https://proxy.cors.sh/${targetUrl}`;
+                case 'codetabs':
+                    return `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;
+                case 'allorigins':
+                    return `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
                 default:
-                    return `${proxy.url}${targetUrl}`;
+                    return targetUrl;
             }
-        }
-
-        async function makeRequestWithFailover(makeRequest, maxRetries = 5) {
-            if (corsMethod === 'demo') {
-                return await makeRequest();
-            }
-            
-            let lastError;
-            const startIndex = currentProxyIndex;
-            
-            for (let attempt = 0; attempt < maxRetries; attempt++) {
-                try {
-                    if (corsMethod === 'auto') {
-                        currentProxyIndex = (startIndex + attempt) % corsProxies.length;
-                        const proxyName = corsProxies[currentProxyIndex].name;
-                        showStatus(`Trying ${proxyName} proxy (attempt ${attempt + 1}/${maxRetries})...`, 'info');
-                    }
-                    
-                    const result = await makeRequest();
-                    updateStatusIndicator(document.getElementById('corsStatus'), 'connected');
-                    
-                    if (attempt > 0) {
-                        showStatus(`✅ Success with ${corsProxies[currentProxyIndex].name} proxy!`, 'success');
-                    }
-                    
-                    return result;
-                } catch (error) {
-                    console.error(`Attempt ${attempt + 1} failed with ${corsProxies[currentProxyIndex].name}:`, error);
-                    lastError = error;
-                    updateStatusIndicator(document.getElementById('corsStatus'), 'error');
-                    
-                    if (corsMethod !== 'auto' || attempt === maxRetries - 1) {
-                        break;
-                    }
-                    
-                    showStatus(`${corsProxies[currentProxyIndex].name} failed, trying next...`, 'error');
-                    
-                    // Progressive delay: 500ms, 1s, 2s, 3s
-                    const delay = Math.min(500 * (attempt + 1), 3000);
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                }
-            }
-            
-            // If all proxies failed, try one more time with a fresh proxy rotation
-            if (corsMethod === 'auto') {
-                showStatus('All proxies failed, trying fresh rotation...', 'error');
-                currentProxyIndex = (currentProxyIndex + 1) % corsProxies.length;
-                
-                try {
-                    const result = await makeRequest();
-                    updateStatusIndicator(document.getElementById('corsStatus'), 'connected');
-                    showStatus(`✅ Success with backup ${corsProxies[currentProxyIndex].name}!`, 'success');
-                    return result;
-                } catch (finalError) {
-                    console.error('Final backup attempt failed:', finalError);
-                    lastError = finalError;
-                }
-            }
-            
-            throw new Error(`All proxy attempts failed. Last error: ${lastError.message}`);
         }
 
         async function testConnection() {
             if (corsMethod === 'demo') {
                 showStatus('✅ Demo mode - all systems ready!', 'success');
-                addMessage('Demo mode test: Claude will naturally switch between character and coach voices based on context!');
-                updateStatusIndicator(document.getElementById('claudeStatus'), 'connected');
-                updateStatusIndicator(document.getElementById('elevenStatus'), 'connected');
+                addMessage('Demo mode test: Everything working perfectly!', false);
                 return;
             }
 
@@ -791,118 +599,91 @@
             showStatus('Testing API connections...', 'info');
             
             try {
-                const claudeResponse = await makeRequestWithFailover(() => 
-                    makeClaudeRequest('Hello, respond with just "API test successful"', 'Respond briefly.'));
-                
+                const claudeResponse = await makeClaudeRequest('Hello, respond with just "API test successful"', 'Respond briefly.');
                 if (claudeResponse) {
                     showStatus('✅ Claude API working!', 'success');
-                    addMessage(claudeResponse);
-                    updateStatusIndicator(document.getElementById('claudeStatus'), 'connected');
+                    addMessage(claudeResponse, false);
                 }
                 
                 const elevenKey = document.getElementById('elevenKey').value;
                 if (elevenKey) {
                     try {
-                        const audioBlob = await makeRequestWithFailover(() => 
-                            makeElevenLabsRequest('API test successful', false));
+                        const audioBlob = await makeElevenLabsRequest('API test successful');
                         if (audioBlob) {
                             showStatus('✅ Both APIs working perfectly!', 'success');
-                            updateStatusIndicator(document.getElementById('elevenStatus'), 'connected');
                         }
                     } catch (voiceError) {
                         showStatus(`Claude works, but ElevenLabs failed: ${voiceError.message}`, 'error');
-                        updateStatusIndicator(document.getElementById('elevenStatus'), 'error');
                     }
                 } else {
                     showStatus('✅ Claude API working! Add ElevenLabs key for voice.', 'success');
                 }
             } catch (error) {
                 showStatus(`❌ API test failed: ${error.message}`, 'error');
-                updateStatusIndicator(document.getElementById('claudeStatus'), 'error');
             }
         }
 
         async function makeClaudeRequest(userMessage, systemPrompt) {
             if (corsMethod === 'demo') {
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                // Enhanced demo responses that follow the full conversation flow
-                const demoResponses = [
-                    "Hi Kit, how's that roomie situation going? Probably different than mine.",
-                    "What do you mean by that? Are you saying my situation is somehow worse? That's pretty judgmental of you, Kit.",
-                    "You know what? I'm getting really tired of your attitude. You always act like you've got everything figured out.",
-                    "Fine, whatever Kit. You never listen anyway. I don't know why I even bother talking to you about anything serious.",
-                    "**Coach:** Kit, I'm stepping in here. This conversation has escalated quite a bit. This is exactly where we can practice better approaches. Let's work on Lesson 1 - stopping and monitoring yourself when emotions run high.",
-                    "**Coach:** I notice you're feeling defensive. That's completely normal! The first lesson is about pausing when emotions run high. Try saying something like 'I want to understand - can you give me a minute?' Are you ready to watch a brief video about this? Here's the link: Video-1",
-                    "**Coach:** Great! Now let's try a different scenario to practice Lesson 1. Let's say you're talking to your boss about a project deadline...",
-                    "Your boss here - I'm really disappointed in your progress on the quarterly report. This is the third time you've missed a deadline.",
-                    "**Coach:** Remember Lesson 1 - try to pause and ask for a minute to understand.",
-                    "**Coach:** Good attempt! I can see you're trying to use the technique. How did that feel? Was it helpful to pause before responding?",
-                    "**Coach:** Now let's work on Lesson 2 - being curious about your own behavior. Are you ready for the second video? Here's the link: Video-2",
-                    "**Coach:** In Lesson 2, we examine our own actions without judgment. Try asking yourself: 'Did my behavior play a role in this?' Then seek confirmation from the other person.",
-                    "**Coach:** Excellent progress! You're learning to be curious rather than defensive. How are you feeling about this approach?",
-                    "**Coach:** Now for Lesson 3 - acknowledging your reaction and focusing on joint repair. Ready for the final video? Here's the link: Video-3",
-                    "**Coach:** Perfect! You've completed all three lessons. In Part 3, you'll practice all these skills together in a new scenario without my interruption.",
-                    "You're at a family dinner and your sibling says: 'You never call Mom anymore. She's really hurt by your neglect.'",
-                    "**Coach:** Wonderful! You've demonstrated mastery of all three lessons - pausing when emotional, being curious about your role, and working toward joint solutions. You've successfully reduced the tension and moved toward repairing the relationship. Would you like to try another practice scenario?"
+                const responses = [
+                    "This is a demo response! The real Claude API would respond here.",
+                    "Demo mode is working perfectly! Your interface is ready for real API integration.",
+                    "Hello! I'm simulating Claude's response. Everything looks good!",
+                    "Great roleplay scenario! In demo mode, I'm just pretending to be your character.",
+                    "The interface is working smoothly. When you add real API keys, I'll give proper responses!"
                 ];
-                
-                return demoResponses[Math.min(demoStep, demoResponses.length - 1)];
+                return responses[Math.floor(Math.random() * responses.length)];
             }
 
-            // Real API mode - this will use your full pasted scenario
             const claudeKey = document.getElementById('claudeKey').value;
-            if (!claudeKey) {
-                throw new Error('Claude API key is required');
-            }
-
             const requestData = {
                 model: 'claude-3-5-sonnet-20241022',
                 max_tokens: 1000,
-                system: systemPrompt, // This contains your full scenario/instructions
+                system: systemPrompt,
                 messages: [...conversationHistory, { role: "user", content: userMessage }]
             };
 
-            let apiUrl = getCorsProxyUrl('https://api.anthropic.com/v1/messages');
-            const proxy = corsProxies[currentProxyIndex];
+            let apiUrl, headers;
             
-            let headers = {
-                'Content-Type': 'application/json',
-                'x-api-key': claudeKey,
-                'anthropic-version': '2023-06-01',
-                'anthropic-dangerous-direct-browser-access': 'true'
-            };
-
-            if (proxy.name === 'thingproxy' || proxy.name === 'cors-anywhere') {
-                headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
+            if (corsMethod === 'cors-sh') {
+                // CORS.SH format
+                apiUrl = 'https://proxy.cors.sh/https://api.anthropic.com/v1/messages';
+                headers = {
+                    'Content-Type': 'application/json',
+                    'x-api-key': claudeKey,
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-dangerous-direct-browser-access': 'true'
+                };
+            } else {
+                // Other proxies
+                apiUrl = getCorsProxyUrl('https://api.anthropic.com/v1/messages');
+                headers = {
+                    'Content-Type': 'application/json',
+                    'x-api-key': claudeKey,
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-dangerous-direct-browser-access': 'true'
+                };
             }
 
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: headers,
-                body: JSON.stringify(requestData),
-                timeout: 30000
+                body: JSON.stringify(requestData)
             });
 
             if (!response.ok) {
                 const errorText = await response.text();
-                throw new Error(`Claude API error ${response.status}: ${errorText.substring(0, 200)}`);
+                throw new Error(`Claude API error ${response.status}: ${errorText}`);
             }
 
-            let data;
-            if (proxy.format === 'json') {
-                const proxyResponse = await response.json();
-                data = JSON.parse(proxyResponse.contents);
-            } else {
-                data = await response.json();
-            }
-            
+            const data = await response.json();
             return data.content[0].text;
         }
 
-        async function makeElevenLabsRequest(text, isCoach = false) {
+        async function makeElevenLabsRequest(text) {
             if (corsMethod === 'demo') {
-                // Create different demo audio for coach vs character
+                // Create a short beep sound as demo audio
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
@@ -910,35 +691,40 @@
                 oscillator.connect(gainNode);
                 gainNode.connect(audioContext.destination);
                 
-                const frequency = isCoach ? 660 : 440; // Higher pitch for coach
-                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
                 gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
                 
                 oscillator.start(audioContext.currentTime);
                 oscillator.stop(audioContext.currentTime + 0.5);
                 
+                // Return a mock blob for demo
                 return new Blob([new ArrayBuffer(1024)], { type: 'audio/mpeg' });
             }
 
             const elevenKey = document.getElementById('elevenKey').value;
+            const customVoiceId = document.getElementById('customVoiceId').value;
+            const voiceId = customVoiceId || selectedVoiceId;
             
-            // Choose voice based on coach detection
-            let voiceId;
-            if (isCoach) {
-                const customCoachVoice = document.getElementById('customCoachVoice').value;
-                voiceId = customCoachVoice || selectedCoachVoice;
+            let apiUrl, headers;
+            
+            if (corsMethod === 'cors-sh') {
+                // CORS.SH format
+                apiUrl = `https://proxy.cors.sh/https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
+                headers = {
+                    'Accept': 'audio/mpeg',
+                    'Content-Type': 'application/json',
+                    'xi-api-key': elevenKey
+                };
             } else {
-                const customCharacterVoice = document.getElementById('customCharacterVoice').value;
-                voiceId = customCharacterVoice || selectedCharacterVoice;
+                // Other proxies
+                apiUrl = getCorsProxyUrl(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`);
+                headers = {
+                    'Accept': 'audio/mpeg',
+                    'Content-Type': 'application/json',
+                    'xi-api-key': elevenKey
+                };
             }
-            
-            let apiUrl = getCorsProxyUrl(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`);
-            let headers = {
-                'Accept': 'audio/mpeg',
-                'Content-Type': 'application/json',
-                'xi-api-key': elevenKey
-            };
 
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -947,10 +733,8 @@
                     text: text,
                     model_id: "eleven_monolingual_v1",
                     voice_settings: {
-                        stability: isCoach ? 0.7 : 0.5,
-                        similarity_boost: isCoach ? 0.8 : 0.75,
-                        style: isCoach ? 0.3 : 0.0,
-                        use_speaker_boost: true
+                        stability: 0.5,
+                        similarity_boost: 0.75
                     }
                 })
             });
@@ -983,18 +767,9 @@
             addMessage(userInput, true);
 
             try {
-                // Use the full scenario as system prompt
-                const systemPrompt = scenario || "You are engaged in a roleplay conversation. You may also act as a coach who steps in to provide guidance. When coaching, clearly indicate you are speaking as coach.";
-                
-                const claudeText = await makeRequestWithFailover(() => 
-                    makeClaudeRequest(userInput, systemPrompt));
-                
+                const systemPrompt = scenario || "You are engaged in a roleplay conversation. Stay in character and respond naturally. Keep your responses engaging but not too long.";
+                const claudeText = await makeClaudeRequest(userInput, systemPrompt);
                 addMessage(claudeText);
-                
-                // Increment demo step for demo mode
-                if (corsMethod === 'demo') {
-                    demoStep++;
-                }
                 
                 // Update conversation history for context (except in demo mode)
                 if (corsMethod !== 'demo') {
@@ -1006,14 +781,31 @@
                     }
                 }
 
-                // Play with correct voice (Taylor or Coach)
-                await playResponseWithCorrectVoice(claudeText);
+                // Try to generate speech
+                const elevenKey = document.getElementById('elevenKey').value;
+                if (elevenKey || corsMethod === 'demo') {
+                    showStatus('Converting to speech...', 'info');
+                    try {
+                        const audioBlob = await makeElevenLabsRequest(claudeText);
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        const audioPlayer = document.getElementById('audioPlayer');
+                        const audioControls = document.getElementById('audioControls');
+                        audioPlayer.src = audioUrl;
+                        audioControls.style.display = 'flex';
+                        audioPlayer.play();
+                        currentAudio = audioPlayer;
+                        showStatus('✅ Playing response!', 'success');
+                    } catch (voiceError) {
+                        showStatus(`Text received! Voice synthesis failed: ${voiceError.message}`, 'error');
+                    }
+                } else {
+                    showStatus('✅ Response received! Add ElevenLabs key for speech.', 'success');
+                }
 
                 document.getElementById('userInput').value = '';
             } catch (error) {
                 showStatus(`❌ Error: ${error.message}`, 'error');
                 console.error('Full error:', error);
-                updateStatusIndicator(document.getElementById('claudeStatus'), 'error');
             }
         }
 
@@ -1028,9 +820,8 @@
         function clearChat() {
             document.getElementById('chatContainer').innerHTML = '<p style="text-align: center; color: #666;">Start a conversation!</p>';
             conversationHistory = [];
-            demoStep = 0; // Reset demo progression
             document.getElementById('audioControls').style.display = 'none';
-            showStatus('Chat cleared - demo reset', 'info');
+            showStatus('Chat cleared', 'info');
         }
 
         // Initialize when page loads
@@ -1047,38 +838,22 @@
                     if (corsMethod === 'demo') {
                         demoInfo.style.display = 'block';
                         apiSetup.style.opacity = '0.5';
-                        showStatus('Demo mode activated - coach voice switching included', 'info');
-                        updateStatusIndicator(document.getElementById('corsStatus'), 'connected');
+                        showStatus('Demo mode activated - no API keys needed', 'info');
                     } else {
                         demoInfo.style.display = 'none';
                         apiSetup.style.opacity = '1';
-                        if (corsMethod === 'auto') {
-                            showStatus('Auto-failover enabled with voice detection', 'info');
-                        } else {
-                            showStatus(`Using ${corsMethod} proxy with voice switching`, 'info');
-                        }
-                        updateStatusIndicator(document.getElementById('corsStatus'), '');
+                        showStatus(`Using ${corsMethod} proxy for API calls`, 'info');
                     }
                 });
             });
 
-            // Character voice selection
-            document.querySelectorAll('#characterVoices .voice-option').forEach(option => {
+            // Voice selection
+            document.querySelectorAll('.voice-option').forEach(option => {
                 option.addEventListener('click', function() {
-                    document.querySelectorAll('#characterVoices .voice-option').forEach(o => o.classList.remove('selected'));
+                    document.querySelectorAll('.voice-option').forEach(o => o.classList.remove('selected'));
                     this.classList.add('selected');
-                    selectedCharacterVoice = this.dataset.voice;
-                    showStatus(`Selected character voice: ${this.textContent}`, 'info');
-                });
-            });
-
-            // Coach voice selection
-            document.querySelectorAll('#coachVoices .voice-option').forEach(option => {
-                option.addEventListener('click', function() {
-                    document.querySelectorAll('#coachVoices .voice-option').forEach(o => o.classList.remove('coach-selected'));
-                    this.classList.add('coach-selected');
-                    selectedCoachVoice = this.dataset.voice;
-                    showStatus(`Selected coach voice: ${this.textContent}`, 'info');
+                    selectedVoiceId = this.dataset.voice;
+                    showStatus(`Selected voice: ${this.textContent}`, 'info');
                 });
             });
 
@@ -1100,11 +875,8 @@
                 document.getElementById('speechBtn').disabled = true;
                 document.getElementById('microphoneHelp').style.display = 'block';
             } else {
-                showStatus('Ready! Auto-failover enabled. 🎤 Speech ready. 🎓 Coach integrated with voice switching.', 'info');
+                showStatus('Ready! Select CORS method and test APIs. 🎤 Speech ready.', 'info');
             }
-            
-            // Initialize status indicators
-            updateStatusIndicator(document.getElementById('corsStatus'), 'connected');
         });
     </script>
 </body>
